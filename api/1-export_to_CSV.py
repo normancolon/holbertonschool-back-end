@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-This module fetches an employee's TODO list on a REST
+This module fetches an employee's TODO list
 """
 import csv
 import requests
