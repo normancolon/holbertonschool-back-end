@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
-This script takes a user ID as a command-line argument, retrieves the corresponding
-username and tasks from the JSONPlaceholder API, and saves the information in a JSON file
+Takes a user ID as a command-line argument, retrieves
+username and tasks from the JSONPlaceholder API,
 named after the user ID.
 """
 import json
@@ -10,7 +10,7 @@ import sys
 
 
 def fetch_user_tasks(user_id):
-    """Fetch tasks and username for a given user ID and write to a JSON file."""
+
     root_url = "https://jsonplaceholder.typicode.com/"
     users_url = f"{root_url}users/{user_id}"
     todos_url = f"{root_url}todos?userId={user_id}"
