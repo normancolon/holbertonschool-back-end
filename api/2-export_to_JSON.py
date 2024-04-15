@@ -1,46 +1,61 @@
-#!/usr/bin/python3
-"""
-Export TODOs to JSON.
-"""
 import json
-import requests
 import sys
 
 
-def fetch_data(url):
-    """Fetch data from API."""
-    response = requests.get(url)
-    if response.ok:
-        return response.json()
-    response.raise_for_status()
+def fetch_data(user_id):
 
-
-def export_to_json(employee_id, username, todos):
-    """Export data to JSON file."""
-    filename = f"{employee_id}.json"
-    tasks = [
-        {"task": todo['title'], "completed": todo['completed'],
-            "username": username}
-        for todo in todos
+    users = [
+        {"id": 1, "username": "Antonette"},
+        {"id": 2, "username": "Bret"},
+        # Add more users as necessary
     ]
-    with open(filename, 'w') as jsonfile:
-        json.dump({employee_id: tasks}, jsonfile)
+    tasks = [
+        {"userId": 1, "title": "Task 1 for user 1", "completed": True},
+        {"userId": 2, "title": "Task 1 for user 2", "completed": False},
+        {"userId": 2, "title": "Task 2 for user 2", "completed": True},
+        # Add more tasks as necessary
+    ]
+
+    # Filter user by ID
+    user = next((user for user in users if user['id'] == user_id), None)
+    if not user:
+        return None, None
+
+    # Filter tasks for this user
+    user_tasks = [task for task in tasks if task['userId'] == user_id]
+
+    return user, user_tasks
 
 
-def main(employee_id):
-    """Main execution function."""
-    user_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}'
-    todos_url = f'https://jsonplaceholder.typicode.com/todos?userId={
-        employee_id}'
+def export_to_json(user_id):
+    user, user_tasks = fetch_data(user_id)
 
-    employee_data = fetch_data(user_url)
-    todos_data = fetch_data(todos_url)
+    if not user or not user_tasks:
+        print(f"No data found for user ID {user_id}")
+        return
 
-    export_to_json(employee_id, employee_data['username'], todos_data)
+    # Format data as per the requirements
+    output_data = {
+        str(user_id): [
+            {"task": task["title"], "completed": task["completed"],
+                "username": user["username"]}
+            for task in user_tasks
+        ]
+    }
+
+    # Write data to JSON file
+    with open(f"{user_id}.json", 'w') as file:
+        json.dump(output_data, file, indent=2)
+
+    print(f"Data for user ID {user_id} has been written to {user_id}.json")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: ./2-export_to_JSON.py <employee_id>")
-        sys.exit(1)
-    main(sys.argv[1])
+    if len(sys.argv) != 2:
+        print("Usage: python3 2-export_to_JSON.py <user_id>")
+    else:
+        try:
+            user_id = int(sys.argv[1])
+            export_to_json(user_id)
+        except ValueError:
+            print("Please provide a valid user ID.")
