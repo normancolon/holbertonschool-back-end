@@ -1,44 +1,65 @@
 #!/usr/bin/python3
 """
-Export employee's TODO list progress to a CSV file from an API.
+This module fetches an employee's TODO list from a REST API and exports it to a CSV file.
 """
 import csv
 import requests
 import sys
 
 
-def fetch_data(url):
-    """Sends a GET request to the specified URL and returns the JSON response."""
-    response = requests.get(url)
-    if response.ok:
-        return response.json()
-    response.raise_for_status()
+def fetch_data(employee_id):
+    """
+    Fetches employee and their TODOs from the API using the provided employee_id.
+    """
+    base_url = 'https://jsonplaceholder.typicode.com'
+    user_url = f'{base_url}/users/{employee_id}'
+    todos_url = f'{base_url}/todos?userId={employee_id}'
+
+    # Fetch user information
+    user_response = requests.get(user_url)
+    if user_response.status_code != 200:
+        return None, None
+    user_data = user_response.json()
+
+    # Fetch TODOs for the user
+    todos_response = requests.get(todos_url)
+    if todos_response.status_code != 200:
+        return user_data, None
+    todos_data = todos_response.json()
+
+    return user_data, todos_data
 
 
-def write_to_csv(employee_id, username, todos):
-    """Writes TODOs to a CSV file formatted with user ID, username, task completion status, and title."""
-    filename = f"{employee_id}.csv"
-    with open(filename, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        for todo in todos:
+def export_to_csv(user_data, todos_data):
+    """
+    Exports the TODOs data to a CSV file formatted as specified.
+    """
+    filename = f"{user_data['id']}.csv"
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file, quoting=csv.QUOTE_ALL)
+        for todo in todos_data:
             writer.writerow(
-                [employee_id, username, todo['completed'], todo['title']])
+                [user_data['id'], user_data['username'], todo['completed'], todo['title']])
 
 
-def main(employee_id):
-    """Main function to process data and write to CSV."""
-    user_url = f'https://jsonplaceholder.typicode.com/users/{employee_id}'
-    todos_url = f'https://jsonplaceholder.typicode.com/todos?userId={
-        employee_id}'
+def main():
+    """
+    Main function to handle command-line arguments and control the flow of data fetching and exporting.
+    """
+    if len(sys.argv) < 2:
+        print("Usage: ./1-export_to_CSV.py <employee_id>")
+        return
 
-    employee_data = fetch_data(user_url)
-    todos_data = fetch_data(todos_url)
+    employee_id = sys.argv[1]
+    user_data, todos_data = fetch_data(employee_id)
 
-    write_to_csv(employee_id, employee_data['username'], todos_data)
+    if user_data is None or todos_data is None:
+        print(f"Failed to retrieve data for user ID {employee_id}")
+        return
+
+    export_to_csv(user_data, todos_data)
+    print(f"Data successfully written to {employee_id}.csv")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: ./1-export_to_CSV.py <employee_id>")
-        sys.exit(1)
-    main(sys.argv[1])
+    main()
