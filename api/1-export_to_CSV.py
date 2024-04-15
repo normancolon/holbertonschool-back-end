@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-This module fetches an employee's TODO list from a REST API and exports it to a CSV file.
+This module fetches an employee's TODO list on a REST
 """
 import csv
 import requests
@@ -8,9 +8,7 @@ import sys
 
 
 def fetch_data(employee_id):
-    """
-    Fetches employee and their TODOs from the API using the provided employee_id.
-    """
+
     base_url = 'https://jsonplaceholder.typicode.com'
     user_url = f'{base_url}/users/{employee_id}'
     todos_url = f'{base_url}/todos?userId={employee_id}'
@@ -31,9 +29,7 @@ def fetch_data(employee_id):
 
 
 def export_to_csv(user_data, todos_data):
-    """
-    Exports the TODOs data to a CSV file formatted as specified.
-    """
+
     filename = f"{user_data['id']}.csv"
     with open(filename, mode='w', newline='') as file:
         writer = csv.writer(file, quoting=csv.QUOTE_ALL)
@@ -43,9 +39,7 @@ def export_to_csv(user_data, todos_data):
 
 
 def main():
-    """
-    Main function to handle command-line arguments and control the flow of data fetching and exporting.
-    """
+
     if len(sys.argv) < 2:
         print("Usage: ./1-export_to_CSV.py <employee_id>")
         return
